@@ -122,5 +122,5 @@ postgres=# select count(*) from temp;
   count
 ---------
  1000001
-(1 row)
+-- (1 row)
 ```
