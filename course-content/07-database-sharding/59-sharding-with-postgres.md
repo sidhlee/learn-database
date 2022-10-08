@@ -128,3 +128,31 @@ CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS
 eb0057096e7b   pgshard          "docker-entrypoint.s…"   41 minutes ago   Up 41 minutes   0.0.0.0:5433->5432/tcp          pgshard2
 ba369980461e   pgshard          "docker-entrypoint.s…"   42 minutes ago   Up 42 minutes   0.0.0.0:5432->5432/tcp          pgshard1
 ```
+
+## Connecting to the Postgres running from a container (WSL)
+
+These are the steps required to connect to DB running in WSL docker container from a Windows app (pgAdmin on Chrome):
+
+1. Open PowerShell
+2. Get WSL2 IP address with `wsl hostname -I`
+
+   ```powershell
+   PS C:\Users\sidhlee> wsl hostname -I
+   172.29.146.216
+   ```
+
+3. Test the connection to the address with `Test-NetConnection`. 5432 is default port used by Postgres.
+
+   ```powershell
+   PS C:\Users\sidhlee> Test-NetConnection -ComputerName 172.29.146.216 -Port 5432
+
+
+   ComputerName     : 172.29.146.216
+   RemoteAddress    : 172.29.146.216
+   RemotePort       : 5432
+   InterfaceAlias   : vEthernet (WSL)
+   SourceAddress    : 172.29.144.1
+   TcpTestSucceeded : True
+   ```
+
+4. Go to pgAdmin Dashboard > Add New Server. Enter Name of the server (eg. shard3), use the container ip address as the Hostname/address, set the username and password for postgres.
