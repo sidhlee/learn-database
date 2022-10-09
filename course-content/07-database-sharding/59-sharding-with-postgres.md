@@ -156,3 +156,5 @@ These are the steps required to connect to DB running in WSL docker container fr
    ```
 
 4. Go to pgAdmin Dashboard > Add New Server. Enter Name of the server (eg. shard3), use the container ip address as the Hostname/address, set the username and password for postgres.
+
+WSL is a virtual machine inside Windows, so it has a separate ip address for WSL then the one used by the physical machine.
