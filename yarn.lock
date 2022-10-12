@@ -72,10 +72,10 @@ combined-stream@^1.0.8:
   dependencies:
     delayed-stream "~1.0.0"
 
-consistent-hash@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/consistent-hash/-/consistent-hash-1.1.1.tgz#bef9ac4c0f8e8059dc62df0ceedb9f0b6e94fb17"
-  integrity sha512-LFbCbNkieNw+KmOiRnLc1YtH7oqdDId9E3i7Oh/7mWxmCRN0rVvywn8iJH2Vb/1PgtmpKThUc8TcEZTHLDPFwA==
+connection-parse@0.0.x:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/connection-parse/-/connection-parse-0.0.7.tgz#18e7318aab06a699267372b10c5226d25a1c9a69"
+  integrity sha512-bTTG28diWg7R7/+qE5NZumwPbCiJOT8uPdZYu674brDjBWQctbaQbYlDKhalS+4i5HxIx+G8dZsnBHKzWpp01A==
 
 content-disposition@0.5.4:
   version "0.5.4"
@@ -245,6 +245,14 @@ has@^1.0.3:
   integrity sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==
   dependencies:
     function-bind "^1.1.1"
+
+hashring@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/hashring/-/hashring-3.2.0.tgz#fda4efde8aa22cdb97fb1d2a65e88401e1c144ce"
+  integrity sha512-xCMovURClsQZ+TR30icCZj+34Fq1hs0y6YCASD6ZqdRfYRybb5Iadws2WS+w09mGM/kf9xyA5FCdJQGcgcraSA==
+  dependencies:
+    connection-parse "0.0.x"
+    simple-lru-cache "0.0.x"
 
 http-errors@2.0.0:
   version "2.0.0"
@@ -508,6 +516,11 @@ side-channel@^1.0.4:
     call-bind "^1.0.0"
     get-intrinsic "^1.0.2"
     object-inspect "^1.9.0"
+
+simple-lru-cache@0.0.x:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/simple-lru-cache/-/simple-lru-cache-0.0.2.tgz#d59cc3a193c1a5d0320f84ee732f6e4713e511dd"
+  integrity sha512-uEv/AFO0ADI7d99OHDmh1QfYzQk/izT1vCmu/riQfh7qjBVUUgRT87E5s5h7CxWCA/+YoZerykpEthzVrW3LIw==
 
 split2@^4.1.0:
   version "4.1.0"

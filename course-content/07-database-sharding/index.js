@@ -1,8 +1,8 @@
 const app = require('express')();
 const { Client } = require('pg');
 const crypto = require('crypto');
-const ConsistentHash = require('consistent-hash');
-const hr = new ConsistentHash();
+const HashRing = require('hashring');
+const hr = new HashRing();
 const os = require('os');
 
 const HOSTNAME = os.hostname();
@@ -43,15 +43,38 @@ async function connect() {
 }
 connect();
 
-app.get('/', (req, res) => {});
+app.get('/:urlId', async (req, res) => {
+  // get by urlId
+  const urlId = req.params.urlId;
+  // get shard by urlId with hash ring (consistent hashing)
+  const server = hr.get(urlId);
+  // make query against the shard
+  const result = await DB_SERVER_CLIENTS[server].query(
+    'SELECT * FROM url_table WHERE url_id = $1',
+    [urlId]
+  );
+
+  if (result.rowCount > 0) {
+    const { id, url, url_id } = result.rows[0];
+    res.send({
+      urlId: url_id,
+      url,
+      server,
+    });
+  } else {
+    res.sendStatus(404);
+  }
+});
 
 app.post('/', async (req, res) => {
   const url = req.query.url;
+  // Create the urlId from the url
   const hash = crypto.createHash('sha256').update(url).digest('base64');
-  // use first 5 characters as url id
   const urlId = hash.substr(0, 5);
+  // Get the shard address hashing the urlId
   const server = hr.get(urlId);
 
+  // Insert into the shard and respond
   await DB_SERVER_CLIENTS[server].query(
     'INSERT INTO URL_TABLE (URL, URL_ID) VALUES ($1,$2)',
     [url, urlId]
