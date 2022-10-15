@@ -7,7 +7,7 @@ When we're reading a value, we have a **shared(read) lock** on the value so that
 
 - There can be only one exclusive lock on a value at a given time. eg. while the painter draws on the board, no one is allowed to see the painting.
 
-- There can be multiple shared locks on a value at a given time. eg. While multiple people are looking at the painting, it cannot be edited. The painter has to wait until no one's seeing it, then cover the painting to paint over it. (exclusive lock)
+- There can be multiple shared locks on a value at a given time. eg. While multiple people are looking at the painting, it cannot be edited. The painter has to wait until all the people are gone (no shared locks), then cover the painting to paint over it. (exclusive lock)
 
 - Exclusive lock cannot be set on a value that is included in a shared lock, and vice versa.
 
