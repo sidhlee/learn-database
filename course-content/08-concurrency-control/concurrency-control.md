@@ -11,7 +11,7 @@ When we're reading a value, we have a **shared(read) lock** on the value so that
 
 - Exclusive lock cannot be set on a value that is included in a shared lock, and vice versa.
 
-## Example: Bank transaction
+### Example: Bank transaction
 
 Starting state: Alice($1000), Bob($600), Charlie ($1200)
 
@@ -32,3 +32,5 @@ Starting state: Alice($1000), Bob($600), Charlie ($1200)
              |--------------------->|
                          |-->X|        |--->|
 ```
+
+## Dead locks
