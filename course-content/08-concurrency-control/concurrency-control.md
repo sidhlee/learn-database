@@ -34,3 +34,92 @@ Starting state: Alice($1000), Bob($600), Charlie ($1200)
 ```
 
 ## Dead locks
+
+Create a new table `test` with only `id` column as a primary key:
+
+```sql
+postgres=# create table test(id serial primary key);
+CREATE TABLE
+postgres=# \d test
+                            Table "public.test
+"
+ Column |  Type   | Collation | Nullable |
+         Default
+--------+---------+-----------+----------+----
+------------------------------
+ id     | integer |           | not null | nex
+tval('test_id_seq'::regclass)
+Indexes:
+    "test_pkey" PRIMARY KEY, btree (id)
+```
+
+Shell into the psql in two terminal windows side by side:
+
+````bash
+```bash
+   $ docker exec -it pg psql -U postgres
+   psql (14.5 (Debian 14.5-1.pgdg110+1))
+   Type "help" for help.
+
+   postgres=#
+````
+
+Begin transaction in both terminal:
+
+```bash
+postgres=# begin transaction;
+BEGIN
+```
+
+Insert a row with a value 1 on the right terminal:
+
+```sql
+postgres=*# insert into test values(1);
+INSERT 0 1
+```
+
+Insert a row with a value 2 on the left terminal:
+
+```sql
+postgres=*# insert into test values(2);
+INSERT 0 1
+```
+
+When you insert another row with a value 1 on the left terminal, Postgres waits to see if the other transaction commits because it's also inserting the same value (optimistic concurrency control - don't acquire hard locks and wait until the other conflicting transactions are committed):
+
+```sql
+postgres=*# insert into test values(1);
+
+```
+
+Now come back to the right terminal and insert the value 2. Postgres detects a deadlock and fails the transaction.
+
+```sql
+postgres=*# insert into test values(2);
+ERROR:  deadlock detected
+DETAIL:  Process 298 waits for ShareLock on transaction 749; blocked by process 78.
+Process 78 waits for ShareLock on transaction 748; blocked by process 298.
+HINT:  See server log for query details.
+CONTEXT:  while inserting index tuple (0,4) in relation "test_pkey"
+postgres=!#
+```
+
+After the transaction in the right terminal fails, insert on the left terminal goes through immediately (this will also fail if another transaction inserts the same value and commits before this):
+
+```sql
+INSERT 0 1
+```
+
+When ending the transaction in the right terminal, Postgres rolls back the operations in memory:
+
+```sql
+postgres=!# end transaction;
+ROLLBACK
+```
+
+The transaction in the left terminal commits successfully when ending transaction:
+
+```sql
+postgres=*# end transaction;
+COMMIT
+```
