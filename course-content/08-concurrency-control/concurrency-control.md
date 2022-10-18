@@ -123,3 +123,117 @@ The transaction in the left terminal commits successfully when ending transactio
 postgres=*# end transaction;
 COMMIT
 ```
+
+## Two phase locking
+
+Phase locking is where the database acquire locks and release them in phases eg. Lock phase - release phase.
+
+### Double booking example
+
+If lock is not properly acquired, multiple customers can book the same seat at the movie theater.
+
+First prepare the table:
+
+```sql
+-- Create seats table
+postgres=# create table seats(
+postgres(# id serial primary key,
+postgres(# is_booked boolean not null,
+postgres(# name varchar(50)
+postgres(# );
+CREATE TABLE
+postgres=# \d seats
+                                     Table "public.seats"
+  Column   |         Type          | Collation | Nullable |
+          Default
+-----------+-----------------------+-----------+----------+----
+-------------------------------
+ id        | integer               |           | not null | nex
+tval('seats_id_seq'::regclass)
+ is_booked | boolean               |           | not null |
+ name      | character varying(50) |           |          |
+Indexes:
+    "seats_pkey" PRIMARY KEY, btree (id)
+
+-- Set is_booked default value (false)
+postgres=# alter table seats
+alter column is_booked
+set default false;
+ALTER TABLE
+
+-- Populate 50 seats
+postgres=# insert into seats
+postgres-# select i
+postgres-# from generate_series(1, 50) as i;
+INSERT 0 50
+```
+
+#### Scenario 1: double booked
+
+```sql
+-- 1. Begin transaction in both term A and B and check row 13
+postgres=# begin transaction;
+BEGIN
+postgres=*# select * from seats where id = 13;
+ id | is_booked | name
+----+-----------+------
+ 13 | f         |
+(1 row)
+
+-- 2. Book the seat from term B for Hayoun
+postgres=*# update seats set is_booked = true, name = 'Hayoun' where id = 13;
+UPDATE 1
+
+-- 3. Book the same seat from term A for Tom. Postgres holds the updates
+postgres=*# update seats set is_booked = true, name = 'Tom' where id = 13;
+
+-- 4. Commit from term B. Term A updates the Row immediately after. Hayoun has the seat
+postgres=*# commit;
+COMMIT
+postgres=# select * from seats where id = 13;
+ id | is_booked |  name
+----+-----------+--------
+ 13 | t         | Hayoun
+(1 row)
+
+-- 5. Now commit from term A. commit goes through and the seat owner is overwritten with Tom.
+postgres=*# commit;
+COMMIT
+
+-- 6. Check the row again from term B. Owner changed to Tom
+postgres=# select * from seats where id = 13;
+ id | is_booked | name
+----+-----------+------
+ 13 | t         | Tom
+(1 row)
+```
+
+We need phase locking to prevent this.
+
+```sql
+-- 1. Begin transactions in both terminals
+postgres=# begin transaction;
+BEGIN
+
+-- 2. Set an exclusive lock on the row 14 from term B
+postgres=*# select * from seats where id = 14 for update;
+ id | is_booked | name
+----+-----------+------
+ 14 | f         |
+(1 row)
+
+-- 3. When term A tries to acquire an exclusive lock for row 14, postgres holds the operation.
+postgres=*# select * from seats where id=14 for update;
+
+-- 4. Book the seat from term B for Hayoun
+postgres=*# update seats set is_booked = True, name = 'Hayoun' where id = 14;
+UPDATE 1
+
+-- 5. When termB commits, the exclusive lock on the row 14 is RELEASED. Term A is now acquires the exclusive lock and sees the changes made from term B. Now you can use a logic to prevent double booking.
+
+postgres=*# select * from seats where id=14 for update;
+ id | is_booked |  name
+----+-----------+--------
+ 14 | t         | Hayoun
+(1 row)
+```
