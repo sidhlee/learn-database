@@ -16,6 +16,8 @@ const pool = new pg.Pool({
   idleTimeoutMillis: 0,
 });
 
+app.use(Express.static(__dirname));
+
 app.get('/', (req, res) => {
   return res.sendFile(__dirname + '/index.html');
 });
@@ -32,6 +34,7 @@ app.put('/:id/:name', async (req, res) => {
 
     // Begin transaction
     await connection.query('BEGIN');
+    // Acquires ROW SHARE LOCK on the table(SELECT ... FOR UPDATE). Update from other transactions will be blocked.
     const result = await connection.query(
       'SELECT * FROM seats where id = $1 and is_booked = False FOR UPDATE',
       [id]

@@ -1,0 +1,19 @@
+* {
+  font-family: monospace;
+}
+
+.seat {
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid black;
+  text-align: center;
+  background-color: #ddd;
+}
+
+.seat:hover {
+  background-color: white;
+}
+
+.seat.booked {
+  background-color: Red;
+}
