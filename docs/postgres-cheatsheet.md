@@ -4,7 +4,7 @@
 
 [PostgreSQL EXPLAIN – What are the Query Costs?](https://scalegrid.io/blog/postgres-explain-cost/)
 
-```sql
+```text
 postgres=# create table users (
 postgres(#   id bigint generated always as identity primary key,
 postgres(#   username text not null);
