@@ -38,7 +38,7 @@ When you add secondary index, the value would be the primary key:
 
 ## Non-clustered Index
 
-A non-clustered index contains tuples
+A non-clustered index stores search key(column value) - row id(tid) pairs in b-tee nodes. This reduces the linear search time to logarithmic time. A table can have multiple non-clustered indexes.
 
 ### B-tree vs B+ tree
 
@@ -48,12 +48,15 @@ The main difference between b-tree and b+tree is how they keep the value (pointe
 - A b-tree keeps key-value pairs in every node without duplicated keys.
 - A b+tree only keeps values in the leaf nodes where all the search keys (column values) are present as a linked list. This is very efficient for ranged queries. (ie. no extra traversal needed for querying neighboring keys)
 - Because b+tree keeps all keys at the leaf level, some keys are duplicated in the internal nodes.
-- Postgres uses the b-tree by default.
-  - But there are some articles and youtube videos describing Postgres index as b+ tree.
-  - Leaf nodes have search key (column value) - tuple(row) id pair
-- B+tree makes sense when
+- Postgres *is said to be* using the b-tree by default.
+  - But there are some articles and youtube videos describing Postgres index as b+ tree. For example, [this video](https://youtu.be/FdIEgGryZyg) from a Postgres convention describes the index system of the postgres **using B+Tree where all the search keys with the corresponding ctids are present at the leaf level as a doubly linked list**.
+  - On top of this doubly linked list, it's adding multiple node levels that have some duplicated keys pointing to a node in the level below. This allows for logarithmic search of the key.
+  - Each node in B+tree is an index page stored in a physical disk.
+- B+tree makes sense when there are a lot of ranged query (eg. by date)
 
 ## Non-key index
+
+You can add a non-key index by using `INCLUDE` clause on Postgres. A non-key index does not store column value as a search key in a B+Tree, but only stores them at the leaf nodes where key (column value) - value(ctid)
 
 Q&A with ChatGPT (edited)
 
