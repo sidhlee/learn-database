@@ -56,6 +56,8 @@ The main difference between b-tree and b+tree is how they keep the value (pointe
 
 ## Non-key index
 
+[Youtube: Be Inclusive: Welcome Non-Key Columns in B-Tree Indexes — Markus Winand](https://youtu.be/FdIEgGryZyg)
+
 You can add a non-key index by using `INCLUDE` clause on Postgres. A non-key index does not store column value as a search key in a B+Tree, but only stores them at the leaf nodes where key (column value) - value(ctid)
 
 Q&A with ChatGPT (edited)
